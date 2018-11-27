@@ -22,13 +22,13 @@ import javax.imageio.ImageIO;
  * @author wu2588
  */
 public class CnnControler {
-    
+
     Vector<Layer> sturct;
-    
+
     CnnControler(Vector<Layer> sturct) {
         this.sturct = sturct;
     }
-    
+
     public void ForwardPropagation(Vector<double[][][]> input) {
         // throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         Boolean flag = false;
@@ -43,9 +43,9 @@ public class CnnControler {
                 front_output = sit.next().getFeatureMaps();
             }
         }
-        
+
     }
-    
+
     public void BackPropagation(Vector<Double> target) {
         for (int i = sturct.size() - 1; i >= 0; i--) {
             if (i == sturct.size() - 1) {
@@ -68,12 +68,13 @@ public class CnnControler {
                     PoolingFeatureMap temp_input[] = ((PoolingLayer) sturct.elementAt(i + 1)).getPooling_featureMap();
                     sturct.elementAt(i).BackPropagation("pooling", temp_input);
                 }
-                
+
             }
-            
+
         }
     }
-        public double[][][] getDate(File input, int high, int width) {
+
+    public double[][][] getDate(File input, int high, int width) {
         double ans[][][] = new double[3][high][width];
         try {
             BufferedImage bufImg = new BufferedImage(high, width, BufferedImage.TYPE_INT_RGB);
@@ -90,55 +91,59 @@ public class CnnControler {
                 }
             }
             for (int d = 0; d < ans.length; d++) {
-                double max=-999999999;
-                double min=999999999;
+                double max = -999999999;
+                double min = 999999999;
                 for (int x = 0; x < bufImg.getHeight(); x++) {
                     for (int y = 0; y < bufImg.getWidth(); y++) {
-                         max =max(ans[d][x][y],max);
-                         min=min(ans[d][x][y],min);
+                        max = max(ans[d][x][y], max);
+                        min = min(ans[d][x][y], min);
                     }
                 }
-                      for (int x = 0; x < bufImg.getHeight(); x++) {
+                for (int x = 0; x < bufImg.getHeight(); x++) {
                     for (int y = 0; y < bufImg.getWidth(); y++) {
-                        double temp=ans[d][x][y];
-                         ans[d][x][y]=(temp-min)/(max-min);
+                        double temp = ans[d][x][y];
+                        ans[d][x][y] = (temp - min) / (max - min);
                     }
                 }
             }
 
-            }catch (IOException ex) {
+        } catch (IOException ex) {
             Logger.getLogger(TEST.class.getName()).log(Level.SEVERE, null, ex);
         }
-            return ans;
-        }
+        return ans;
+    }
 
-    
-
-    public Vector <TrainingDate> readfile(String filepath,int output_num) {
+    public Vector<TrainingDate> readfile(String filepath, int output_num) {
         File file = new File(filepath);
         // get the folder list   
-        Vector <TrainingDate> ans=new Vector <TrainingDate>();
+        Vector<TrainingDate> ans = new Vector<TrainingDate>();
         File[] array = file.listFiles();
         for (int i = 0; i < array.length; i++) {
             String file_name = array[i].getName();
-              int  target = file_name.charAt(0) - '0';  
+            int target = file_name.charAt(0) - '0';
             File temp_file = array[i].getAbsoluteFile();
-            double temp[][][]=getDate(temp_file,28,28);
-            Vector<Double> output_target=new Vector<Double>();
-            for(int j=0;j<output_num;j++)
-            {
-                if(j!=target)
-                {
+            double temp[][][] = getDate(temp_file, 28, 28);
+            Vector<Double> output_target = new Vector<Double>();
+            for (int j = 0; j < output_num; j++) {
+                if (j != target) {
                     output_target.add(0.0);
-                }
-                else
-                {
+                } else {
                     output_target.add(1.0);
                 }
             }
-            TrainingDate td=new TrainingDate(temp,output_target);
+            TrainingDate td = new TrainingDate(temp, output_target);
             ans.add(td);
         }
         return ans;
     }
+
+    public double TesAccuracy(String file_floder, int output_num) {
+        Vector<TrainingDate> text_data = readfile(file_floder, output_num);
+        for (Iterator<TrainingDate> it = text_data.iterator(); it.hasNext();) {
+            TrainingDate td=it.next();
+            ForwardPropagation(td.featureMap);
+            
+        }
+    }
+
 }
