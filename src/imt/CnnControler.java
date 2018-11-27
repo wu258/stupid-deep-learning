@@ -123,27 +123,77 @@ public class CnnControler {
             int target = file_name.charAt(0) - '0';
             File temp_file = array[i].getAbsoluteFile();
             double temp[][][] = getDate(temp_file, 28, 28);
-            Vector<Double> output_target = new Vector<Double>();
-            for (int j = 0; j < output_num; j++) {
-                if (j != target) {
-                    output_target.add(0.0);
-                } else {
-                    output_target.add(1.0);
-                }
-            }
-            TrainingDate td = new TrainingDate(temp, output_target);
+
+            TrainingDate td = new TrainingDate(temp, target);
             ans.add(td);
         }
         return ans;
     }
 
-    public double TesAccuracy(String file_floder, int output_num) {
-        Vector<TrainingDate> text_data = readfile(file_floder, output_num);
-        for (Iterator<TrainingDate> it = text_data.iterator(); it.hasNext();) {
-            TrainingDate td=it.next();
-            ForwardPropagation(td.featureMap);
-            
+    public Boolean isCorrect(Vector<double[][]> model_output, int tar) {
+        double max = -999999999;
+        int index = -1;
+        int count = 0;
+        for (Iterator<double[][]> it = model_output.iterator(); it.hasNext();) {
+
+            if (max <= it.next()[0][0]) {
+                max = max(max, it.next()[0][0]);
+                index = count;
+            }
+            count++;
         }
+        if (tar != index) {
+            return false;
+        }
+        return true;
     }
 
+    public double TestSetAccuracy(String file_floder, int output_num) {
+        Vector<TrainingDate> text_data = readfile(file_floder, output_num);
+        int count = 0;
+        for (Iterator<TrainingDate> it = text_data.iterator(); it.hasNext();) {
+            TrainingDate td = it.next();
+            ForwardPropagation(td.featureMap);
+            Vector<double[][]> model_output = sturct.lastElement().getFeatureMaps();
+            Boolean b = isCorrect(model_output, td.target);
+            if (b) {
+                count++;
+            }
+
+        }
+        return count / text_data.size();
+    }
+    public Vector<Double> setupTarget(int input,int output_num)
+    {
+        Vector<Double> temp=new Vector<Double>();
+        for(int i=0;i<output_num;i++)
+        {
+            if(i!=input)
+            {
+                temp.add(0.0);
+            }
+            else
+            {
+                temp.add(1.0);
+            }
+        }
+        return temp;
+    }
+    public void startTraining(String file_floder, int output_num) {
+
+        Vector<TrainingDate> text_data = readfile(file_floder, output_num);
+        while (true) {
+            int count = 0;
+            for (Iterator<TrainingDate> it = text_data.iterator(); it.hasNext();) {
+                TrainingDate td = it.next();
+                ForwardPropagation(td.featureMap);
+                Vector<double[][]> model_output = sturct.lastElement().getFeatureMaps();
+                Boolean b = isCorrect(model_output, td.target);
+                if (b) {
+                    count++;
+                }
+
+            }
+        }
+    }
 }
