@@ -192,6 +192,7 @@ public class CnnControler {
                 if (b) {
                     count++;
                 }
+                Vector<Double> target_v=setupTarget(td.target,output_num);
 
             }
         }
