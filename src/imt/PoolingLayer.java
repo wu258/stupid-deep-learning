@@ -42,6 +42,7 @@ public class PoolingLayer implements Layer{
         this.p_y_size=p_y_size;
         this.p_x_size=p_x_size;
         this.size=size;
+        pooling_featureMap=new PoolingFeatureMap[size];
         featureMap=new Vector<double[][]>();
         this.con_lab=con_lab;
         this.act_type=act_type;
@@ -53,6 +54,7 @@ public class PoolingLayer implements Layer{
         featureMap=new Vector<double[][]>();
         int t_i=0;
         for (Iterator<double[][]> it = input_data.iterator(); it.hasNext();) {
+            it.next();
            PoolingFeatureMap temp_p=new PoolingFeatureMap(act_type,p_y_size,p_x_size,"max");
             getPooling_featureMap()[t_i++]=temp_p;
         }
