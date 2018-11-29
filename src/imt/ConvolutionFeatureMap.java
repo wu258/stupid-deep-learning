@@ -74,7 +74,7 @@ public class ConvolutionFeatureMap {
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         detle_map = new DetleMap(futuremap.length, futuremap[0].length);
         if (next_layer_type.equals("full")) {
-            detle_map.detlemap= dot_product(input_detle_map,activition_layer.derivative_map);
+            detle_map.detlemap= dot_product(input_detle_map,activition_layer.derivative_mapdsdsds);
            
         }
         kernel.BackPropagation(detle_map.detlemap);
