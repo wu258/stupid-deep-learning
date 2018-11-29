@@ -35,12 +35,14 @@ public class CnnControler {
         Vector<double[][]> front_output = null;
         for (Iterator<Layer> sit = sturct.iterator(); sit.hasNext();) {
             if (!flag) {
-                sit.next().ForwardPropagation(input);
-                front_output = sit.next().getFeatureMaps();
+                Layer temp_layer=sit.next();
+                temp_layer.ForwardPropagation(input);
+                front_output =temp_layer.getFeatureMaps();
                 flag = true;
             } else {
-                sit.next().ForwardPropagation(front_output);
-                front_output = sit.next().getFeatureMaps();
+                Layer temp_layer=sit.next();
+                temp_layer.ForwardPropagation(front_output);
+                front_output =temp_layer.getFeatureMaps();
             }
         }
 
@@ -193,7 +195,7 @@ public class CnnControler {
                     count++;
                 }
                 Vector<Double> target_v=setupTarget(td.target,output_num);
-
+                BackPropagation(target_v);
             }
         }
     }
