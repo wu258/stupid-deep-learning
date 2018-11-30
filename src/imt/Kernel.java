@@ -148,6 +148,11 @@ public class Kernel {
         derivative_map = new DerivativeMap(y_size, x_size);
         kernel_map = new double[y_size][x_size];
         kernel_map = matrix_random_init(kernel_map);
+        if(deep>1)
+        {
+            deep_kernel_map=new double[deep][y_size][x_size];
+            matrix_random_init(deep_kernel_map);
+        }
     }
 
     public void ForwardPropagation(Vector input) {// need recheak
@@ -214,7 +219,7 @@ public class Kernel {
     public void BackPropagation(double input_detle_map[][]) {//多层卷积核对应的多层上一层的X，这里要改
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         if (deep > 1) {
-            mul_kernel_derivative_map = derivative_map.calculate_mul_DerivativeMap(deep_input_data, input_detle_map, "kernel");
+            mul_kernel_derivative_map = derivative_map.calculate_mul_DerivativeMap(deep_input_data, input_detle_map, "mul_kernel");
             mul_kernel_updata();
         } else {
             kernel_derivative_map = derivative_map.calculateDerivativeMap(input_data, input_detle_map, "kernel");
