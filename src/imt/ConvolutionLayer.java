@@ -32,6 +32,7 @@ public class ConvolutionLayer implements Layer {
     int featureMap_num;
     private ConvolutionFeatureMap convolution_featureMap[];
     Vector<Integer> con_lab[];
+    public Vector<Integer> front_con_lab[];
     int k_deep;
     int k_y_size;
     int k_x_size;
@@ -41,6 +42,19 @@ public class ConvolutionLayer implements Layer {
     double a=1;
     ConvolutionLayer(int featureMap_num, int k_deep, int k_y_size, int k_x_size, Vector<Integer> con_lab[], String act_type) {
         this.featureMap_num = featureMap_num;
+        convolution_featureMap = new ConvolutionFeatureMap[featureMap_num];
+        this.k_deep = k_deep;
+        this.k_y_size = k_y_size;
+        this.k_x_size = k_x_size;
+        this.con_lab = con_lab;
+        featureMap = new Vector<double[][]>();
+        for (int i = 0; i < featureMap_num; i++) {
+            convolution_featureMap[i] = new ConvolutionFeatureMap(k_deep, k_y_size, k_x_size, act_type);
+        }
+    }
+     ConvolutionLayer(int featureMap_num, int k_deep, int k_y_size, int k_x_size, Vector<Integer> con_lab[],Vector<Integer> front_con_lab[], String act_type) {
+        this.featureMap_num = featureMap_num;
+        this.front_con_lab=front_con_lab;
         convolution_featureMap = new ConvolutionFeatureMap[featureMap_num];
         this.k_deep = k_deep;
         this.k_y_size = k_y_size;
@@ -72,6 +86,7 @@ public class ConvolutionLayer implements Layer {
                 Vector<double[][]> temp_input = new Vector();
                 for (Iterator<Integer> it = con_lab[i].iterator(); it.hasNext();) {
                     int temp_index = it.next();
+                  //  System.out.println(temp_index);
                     temp_input.add((double[][]) input.elementAt(temp_index));
                 }
                 getConvolution_featureMap()[i].ForwardPropagation(temp_input);
@@ -88,7 +103,7 @@ public class ConvolutionLayer implements Layer {
             for (int i = 0; i < getConvolution_featureMap().length; i++) {
                 Vector<double[][]> temp_input_detle = new Vector();
                 Vector<double[][]> temp_input_kernel = new Vector();
-                for (Iterator<Integer> it = con_lab[i].iterator(); it.hasNext();) {
+                for (Iterator<Integer> it = front_con_lab[i].iterator(); it.hasNext();) {
                     int temp_index = it.next();
                     temp_input_detle.add((double[][]) input_convolution_featureMap[temp_index].detle_map.detlemap);
                     temp_input_kernel.add(input_convolution_featureMap[temp_index].kernel.getKernel_map());
