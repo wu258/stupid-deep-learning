@@ -130,7 +130,7 @@ public class ConvolutionLayer implements Layer {
     }
 
     @Override
-    public void BackPropagation(String next_layer_type, Vector<double[][]> input_detle) {
+    public void BackPropagation(String next_layer_type, Vector<double[][]> input_detle) {////jhjh
 
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         if (next_layer_type.equals("full")) {
