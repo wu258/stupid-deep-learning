@@ -5,6 +5,7 @@
  */
 package imt;
 
+import static imt.TEST.getConIndex;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Random;
@@ -15,44 +16,47 @@ import java.util.Vector;
  * @author wu2588
  */
 public class BasicAlgorithm {
-   
+
     static public double[][] convolution(double input[][], double kernel[][])//卷积
     {
-        int k_l = kernel.length;
-        int k_w = kernel[0].length;
-        int temp_k_l = k_l;
+        int k_l=kernel.length;
+        int k_w=kernel[0].length;
+        int temp_k_l=k_l;
         //System.out.println("assdsdsdsdsasd"+kernel.length);
-        double ans[][] = new double[input.length - k_l + 1][input[0].length - k_w + 1];
-
-        int ans_y = 0;
-
-        while (temp_k_l <= input.length) {
-            int ans_x = 0;
-            for (int i = k_w; i <= input[0].length; i++) {
-                int t_i = 0;
-                double total = 0;
-                for (int y = temp_k_l - k_l; y < temp_k_l; y++) {
-                    int t_j = 0;
-                    for (int x = i - k_w; x < i; x++) {
-                        total += (input[y][x] * kernel[t_i][t_j]);
-                        t_j++;
-                    }
-                    t_i++;
+        double ans[][]=new double[input.length-k_l+1][input[0].length-k_w+1];
+        
+        int ans_y=0;
+       
+        while(temp_k_l<= input.length)
+      {
+           int ans_x=0;
+        for(int i=k_w;i<=input[0].length;i++)
+        {
+            int t_i=0;
+            double total=0;
+            for(int y=temp_k_l-k_l;y<temp_k_l;y++)
+            {
+              int t_j=0;
+                for(int x=i-k_w;x<i;x++)
+                {
+                   total+=(input[y][x]*kernel[t_i][t_j]);
+                  t_j++;
                 }
-                ans[ans_y][ans_x] = total;
-                ans_x++;
+                 t_i++;
             }
-            temp_k_l++;
-            ans_y++;
+           ans[ans_y][ans_x]=total;
+            ans_x++;
         }
+        temp_k_l++;
+        ans_y++;
+       }
         return ans;
-
     }
 
     static public double[][][] convolution(double input[][][], double kernel[][][])//三维卷积
     {
-        int k_l = kernel.length;
-        int k_w = kernel[0].length;
+        int k_l = kernel[0].length;
+        int k_w = kernel[0][0].length;
         int temp_k_l = k_l;
         //System.out.println("assdsdsdsdsasd"+kernel.length);
         double ans[][][] = new double[input.length][input[0].length - k_l + 1][input[0][0].length - k_w + 1];
@@ -61,14 +65,14 @@ public class BasicAlgorithm {
         }
         return ans;
     }
-    
+
     static public double[][][] matrix_random_init(double in[][][]) {
         Random random = new Random();
         double temp[][][] = new double[in.length][in[0].length][in[0][0].length];
         for (int d = 0; d < in.length; d++) {
             for (int i = 0; i < temp[0].length; i++) {
                 for (int j = 0; j < temp[0][0].length; j++) {
-                    temp[d][i][j] = random.nextDouble();
+                    temp[d][i][j] = random.nextGaussian()/10;
                 }
             }
         }
@@ -81,7 +85,7 @@ public class BasicAlgorithm {
 
         for (int i = 0; i < temp.length; i++) {
             for (int j = 0; j < temp[0].length; j++) {
-                temp[i][j] = random.nextDouble();
+                temp[i][j] = random.nextGaussian()/10;
             }
         }
 
@@ -112,19 +116,21 @@ public class BasicAlgorithm {
         }
         return ans;
     }
- static public double[][] up(double input[][],int n)//矩阵扩展 上采样
-   {
-       double one[][]=new double[n][n];
-       one=matrix_adding(one,1);
-       double ans[][]= Kronecker(input,one);
-       for(int i=0;i<ans.length;i++)
-           for(int j=0;j<ans[0].length;j++)
-           {
-               ans[i][j]=ans[i][j]/(n*n);//因为均值池化 灵敏度map需要平均
-           }
-      
-       return ans;
-   }
+
+    static public double[][] up(double input[][], int n)//矩阵扩展 上采样
+    {
+        double one[][] = new double[n][n];
+        one = matrix_adding(one, 1);
+        double ans[][] = Kronecker(input, one);
+        for (int i = 0; i < ans.length; i++) {
+            for (int j = 0; j < ans[0].length; j++) {
+                ans[i][j] = ans[i][j];//因为均值池化 灵敏度map需要平均
+            }
+        }
+
+        return ans;
+    }
+
     static public double[][] conv2(double input[][], double kernel[][], String type)//conv2
     {
         double map[][];
@@ -155,12 +161,24 @@ public class BasicAlgorithm {
         }
         return ans;
     }
-static public double[][] dot_product(double A[][], double B)//矩阵点乘
+
+    static public double[][] dot_product(double A[][], double B)//矩阵点乘
     {
-         double ans[][] = new double[A.length][A[0].length];
+        double ans[][] = new double[A.length][A[0].length];
         for (int i = 0; i < A.length; i++) {
             for (int j = 0; j < A[0].length; j++) {
                 ans[i][j] = A[i][j] * B;
+            }
+        }
+        return ans;
+    }
+    static public double[][][] dot_product(double A[][][], double B)//矩阵点乘
+    {
+        double ans[][][] = new double[A.length][A[0].length][A[0][0].length];
+        for(int d=0;d<A.length;d++)
+        for (int i = 0; i < A[0].length; i++) {
+            for (int j = 0; j < A[0][0].length; j++) {
+                ans[d][i][j] = A[d][i][j] * B;
             }
         }
         return ans;
@@ -182,9 +200,9 @@ static public double[][] dot_product(double A[][], double B)//矩阵点乘
         return 1 / (1 + Math.exp(-in));
 
     }
-    static double Sigmoid_derivative(double in)
-    {
-         return Sigmoid(in)*(1-Sigmoid(in));
+
+    static double Sigmoid_derivative(double in) {
+        return Sigmoid(in) * (1 - Sigmoid(in));
     }
 
     public static double relu(double in)//relu
@@ -214,19 +232,15 @@ static public double[][] dot_product(double A[][], double B)//矩阵点乘
         return A;
 
     }
-     static public double[][] matrix_derivative(String type,double A[][]) {
+
+    static public double[][] matrix_derivative(String type, double A[][]) {
         for (int i = 0; i < A.length; i++) {
             for (int j = 0; j < A[0].length; j++) {
-                if(type.equals("relu"))
-                {
-                A[i][j] = relu_derivative(A[i][j]);
-                }
-                else if(type.equals("Sigmoid"))
-                {
+                if (type.equals("relu")) {
+                    A[i][j] = relu_derivative(A[i][j]);
+                } else if (type.equals("Sigmoid")) {
                     A[i][j] = Sigmoid_derivative(A[i][j]);
-                }
-                else
-                {
+                } else {
                     throw new UnsupportedOperationException("WRONG TYPE"); //To change body of generated methods, choose Tools | Templates.
                 }
             }
@@ -234,22 +248,23 @@ static public double[][] dot_product(double A[][], double B)//矩阵点乘
         return A;
 
     }
-    static public double sumMatrixElement(double in[][])
-    {
-           double ans=0;
-        for(int i=0;i<in.length;i++)
-            for(int j=0;j<in[0].length;j++)
-            {
-                ans+=in[i][j];
+
+    static public double sumMatrixElement(double in[][]) {
+        double ans = 0;
+        for (int i = 0; i < in.length; i++) {
+            for (int j = 0; j < in[0].length; j++) {
+                ans += in[i][j];
             }
+        }
         return ans;
     }
+
     static public double[][][] matrix_adding(double A[][][], double B[][][])//矩阵相加
     {
         double temp[][][] = new double[A.length][A[0].length][A[0][0].length];
         for (int d = 0; d < A.length; d++) {
-            for (int i = 0; i < temp.length; i++) {
-                for (int j = 0; j < temp[0].length; j++) {
+            for (int i = 0; i < temp[0].length; i++) {
+                for (int j = 0; j < temp[0][0].length; j++) {
                     temp[d][i][j] = (A[d][i][j] + B[d][i][j]);
 
                 }
@@ -257,19 +272,21 @@ static public double[][] dot_product(double A[][], double B)//矩阵点乘
         }
         return temp;
     }
- static public double[][] matrix_adding(double A[][], double B[][])//矩阵相加
+
+    static public double[][] matrix_adding(double A[][], double B[][])//矩阵相加
     {
         double temp[][] = new double[A.length][A[0].length];
-        
-            for (int i = 0; i < temp.length; i++) {
-                for (int j = 0; j < temp[0].length; j++) {
-                    temp[i][j] = (A[i][j] + B[i][j]);
 
-                }
+        for (int i = 0; i < temp.length; i++) {
+            for (int j = 0; j < temp[0].length; j++) {
+                temp[i][j] = (A[i][j] + B[i][j]);
+
             }
-        
+        }
+
         return temp;
     }
+
     static public double[][] matrix_adding(double A[][], double B)//矩阵加常数
     {
         double temp[][] = new double[A.length][A[0].length];
@@ -281,50 +298,43 @@ static public double[][] dot_product(double A[][], double B)//矩阵点乘
         }
         return temp;
     }
-    static public double[][] subsample(double in[][],int y_size,int x_size,String type)
-    {
-        double ans[][]=new double[in.length/y_size][in[0].length/x_size];
-        int y_count=0;
-      
-        for(int i=y_size;i<=in.length;i+=y_size)
-        {
-             int x_count=0;
-            for(int j=y_size;j<=in[0].length;j+=x_size)
-            {
-                double max=-999999999;
-                for(int y=i-y_size;y<i;y++)
-                {
-                    for(int x=j-x_size;x<j;x++)
-                    {
-                        if(max<in[y][x])
-                        {
-                            max=in[y][x];
+
+    static public double[][] subsample(double in[][], int y_size, int x_size, String type) {
+        double ans[][] = new double[in.length / y_size][in[0].length / x_size];
+        int y_count = 0;
+
+        for (int i = y_size; i <= in.length; i += y_size) {
+            int x_count = 0;
+            for (int j = y_size; j <= in[0].length; j += x_size) {
+                double max = -999999999;
+                for (int y = i - y_size; y < i; y++) {
+                    for (int x = j - x_size; x < j; x++) {
+                        if (max < in[y][x]) {
+                            max = in[y][x];
                         }
                     }
                 }
-              
-                ans[y_count][x_count]=max;
-                  x_count++;
+
+                ans[y_count][x_count] = max;
+                x_count++;
             }
-            
+
             y_count++;
         }
         return ans;
     }
-      static void print_matrix(double in[][])
-    {
-        for(int i=0;i<in.length;i++)
-        {
-                 for(int j=0;j<in[0].length;j++)
-                 {
-                     System.out.print(in[i][j]+" ");
-                 }
-                  System.out.println();
+    
+    static void print_matrix(double in[][]) {
+        for (int i = 0; i < in.length; i++) {
+            for (int j = 0; j < in[0].length; j++) {
+                System.out.print(in[i][j] + " ");
+            }
+            System.out.println();
         }
     }
-      
+
     public static void main(String[] args) throws IOException {
-            
+
         /*double input[][]=new double[2][2];
          //for(int d=0;d<input.length;d++)
              for(int i=0;i<input.length;i++)
@@ -332,20 +342,54 @@ static public double[][] dot_product(double A[][], double B)//矩阵点乘
                  {
                      input[i][j]=i+j;
                  }
-         print_matrix(input); */
-        Vector <DetleMap> v=new Vector();
-        DetleMap dm=new DetleMap(1,1);
-        v.add(dm);
-        
-               v.elementAt(0).x_size=211;
+         print_matrix(input); 
+        double a[][] = new double[][]{{1, 2, 4, 7, 8, 9},
+        {2, 6, 4, 3, 7, 8},
+        {6, 4, 5, 7, 2, 3},
+        {3, 4, 9, 7, 6, 3},
+        {4, 5, 7, 4, 6, 4},
+        {6, 5, 6, 2, 1, 0},
+        {7, 8, 9, 10, 28, 76},
+        {45, 33, 66, 7, 8, 8},
+        {4, 8, 6, 4, 6, 7}};
+        double b[][] = new double[][]{
+            {-1, -1, -1},
+            {-1, 9, -1},
+            {-1, -1, -1}};
+        print_matrix(convolution(a, b));
+*/
+         ConIndexSet cis = getConIndex(25, 1, 1);
+          Vector<Layer> sturct=new Vector<Layer>();
+           
+             ConIndexSet cis2 =getConIndex(2, 10, 10);
+          ConvolutionLayer cl1 = new ConvolutionLayer(25, 3, 1, 1, cis.con_lab,cis2.front_con_lab, "relu");
+          cis = getConIndex(2, 10, 10);
           
-           System.out.println(v.elementAt(0).x_size);
-           Vector<Integer> con_lab[]=new Vector[1];
-           con_lab[0]=new Vector();
-           con_lab[0].add(1);
-           Layer l=new ConvolutionLayer(3,3,5,5,con_lab,"sigmoid");
-           l.getLaterType();
-           ConvolutionLayer t=(ConvolutionLayer)l;
-             System.out.println(t.a);
+            //ConvolutionLayer cl2 = new ConvolutionLayer(2, 1, 1, 1, cis.con_lab,cis.front_con_lab,"sigmoid");
+            sturct.add(cl1);
+            int layer_num_list[]={1,2};
+             FullConnectLayer fl=new FullConnectLayer("sigmoid", layer_num_list, 25,layer_num_list);
+            //sturct.add(cl2);
+            sturct.add(fl);
+            CnnControler cl=new CnnControler(sturct);
+            
+            Vector <double[][][]> featureMap=new  Vector <double[][][]>();
+            double out[][][]=new double[3][1][1];
+            out[0][0][0]=1;
+              out[1][0][0]=0;
+                out[2][0][0]=0;
+            featureMap.add(out);
+            TrainingDate td=new TrainingDate(out,0);
+              featureMap=new  Vector <double[][][]>();
+               double out1[][][]=new double[3][1][1];
+            out1[0][0][0]=1;
+              out1[1][0][0]=0;
+                out1[2][0][0]=1;
+            featureMap.add(out);
+            TrainingDate td2=new TrainingDate(out1,1);
+            Vector<TrainingDate> text_data=new Vector<TrainingDate>();
+            text_data.add(td);
+            text_data.add(td2);
+            cl.text_startTraining(text_data, 2);
     }
 }

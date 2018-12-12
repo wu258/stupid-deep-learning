@@ -21,21 +21,30 @@ public class ActivitionLayer {
     double derivative_map[][];
 
     public double relu(double in) {
-        return max(0, in);
+         if (in > 0) {
+            return in;
+        } else {
+            return 0.25*in;
+        }
     }
 
     public double relu_derivative(double in) {
         if (in > 0) {
-            return in;
+            return 1;
         } else {
-            return 0;
+            return 0.25;
         }
     }
 
     public double sigmoid(double in) {
         return 1 / (1 + Math.exp(-in));
     }
-
+     public double pooling(double in) {
+        return in;
+    }
+      public double pooling_derivative(double in) {
+        return 1;
+    }
     public double sigmoid_derivative(double in) {
         return sigmoid(in) * (1 - sigmoid(in));
     }
@@ -52,7 +61,12 @@ public class ActivitionLayer {
                     ans[i][j] = sigmoid(in[i][j]);
                 } else if (type.equals("relu")) {
                     ans[i][j] = relu(in[i][j]);
-                } else {
+                } 
+                 else if(type.equals("pooling"))
+                {
+                    ans[i][j] = pooling(in[i][j]);
+                }
+                 else {
                     throw new UnsupportedOperationException("warong activation function type!"); //To change body of generated methods, choose Tools | Templates.
                 }
             }
@@ -68,7 +82,12 @@ public class ActivitionLayer {
                     ans[i][j] = sigmoid_derivative(in[i][j]);
                 } else if (type.equals("relu")) {
                     ans[i][j] = relu_derivative(in[i][j]);
-                } else {
+                } 
+                else if(type.equals("pooling"))
+                {
+                    ans[i][j] = pooling_derivative(in[i][j]);
+                }
+                else {
                     throw new UnsupportedOperationException("warong activation function type!"); //To change body of generated methods, choose Tools | Templates.
                 }
             }
@@ -80,13 +99,14 @@ public class ActivitionLayer {
         // throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         input_map = in;
         feature_map = Activation_matrix(input_map);
+        calculaeDerivative();
         return feature_map;
     }
 
     public double[][] calculaeDerivative() {
         // throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         derivative_map = new double[feature_map.length][feature_map[0].length];
-        derivative_map = matrix_derivative(feature_map);
+        derivative_map = matrix_derivative(input_map);
         return derivative_map;
     }
 

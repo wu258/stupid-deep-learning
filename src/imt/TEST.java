@@ -5,6 +5,7 @@
  */
 package imt;
 
+import static imt.CnnControler.setN;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -24,55 +25,59 @@ import javax.imageio.ImageIO;
  */
 public class TEST {
 
-    public double[][][] getDate(File input, int high, int width) {
-        double ans[][][] = new double[3][high][width];
-        try {
-            BufferedImage bufImg = new BufferedImage(high, width, BufferedImage.TYPE_INT_RGB);
-            bufImg = ImageIO.read(input);
-            for (int x = 0; x < bufImg.getHeight(); x++) {
-                for (int y = 0; y < bufImg.getWidth(); y++) {
-                    Color c = new Color(bufImg.getRGB(x, y));
-                    int red = c.getRed();
-                    int green = c.getGreen();
-                    int blue = c.getBlue();
-                    ans[0][x][y] = red;
-                    ans[1][x][y] = green;
-                    ans[2][x][y] = blue;
+    public static ConIndexSet getConIndex(int out_num, int range, int mod_number) {
+        Vector<Integer> con_lab[] = new Vector[out_num];
+        Vector<Integer> front_con_lab[] = new Vector[range];
+        for (int i = 0; i < range; i++) {
+            front_con_lab[i] = new Vector<Integer>();
+        }
+        int count = 0;
+        for (int i = 0; i < out_num; i++) {
+            con_lab[i] = new Vector<Integer>();
+            for (int j = 0; j < mod_number; j++) {
+                front_con_lab[count].add(i);
+                con_lab[i].add(count++);
+                if (count >= range) {
+                    count = 0;
                 }
             }
-            for (int d = 0; d < ans.length; d++) {
-                double max=-999999999;
-                double min=999999999;
-                for (int x = 0; x < bufImg.getHeight(); x++) {
-                    for (int y = 0; y < bufImg.getWidth(); y++) {
-                         max =max(ans[d][x][y],max);
-                         min=min(ans[d][x][y],min);
-                    }
-                }
-                      for (int x = 0; x < bufImg.getHeight(); x++) {
-                    for (int y = 0; y < bufImg.getWidth(); y++) {
-                        double temp=ans[d][x][y];
-                         ans[d][x][y]=(temp-min)/(max-min);
-                    }
-                }
-            }
-
-            }catch (IOException ex) {
-            Logger.getLogger(TEST.class.getName()).log(Level.SEVERE, null, ex);
         }
-            return ans;
-        }
-
-    
-
-    public Vector <TrainingDate> readfile(String filepath) {
-        File file = new File(filepath);
-        // get the folder list   
-        File[] array = file.listFiles();
-        for (int i = 0; i < array.length; i++) {
-            String file_name = array[i].getName();
-            File temp_file = array[i].getAbsoluteFile();
-            
-        }
+        return new ConIndexSet(con_lab, front_con_lab);
     }
+
+    public static void main(String[] args) throws IOException {
+        Vector<Layer> sturct=new Vector<Layer>();
+      
+        ConIndexSet cis1 = getConIndex(6, 1, 1);
+        ConvolutionLayer cl1 = new ConvolutionLayer(6, 3, 5, 5, cis1.con_lab, "relu");
+         ConIndexSet cis2 = getConIndex(16, 6, 6);
+        PoolingLayer p1 = new PoolingLayer("relu", 6, 2, 2, cis2.front_con_lab);
+         ConIndexSet cis3 = getConIndex(16, 4, 4);
+        ConvolutionLayer cl2 = new ConvolutionLayer(16, 1, 5, 5, cis3.con_lab, "relu");
+         ConIndexSet cis4 = getConIndex(144, 16, 16);
+        PoolingLayer p2 = new PoolingLayer("relu", 16, 2, 2, cis4.front_con_lab);
+         ConIndexSet cis5 = getConIndex(144, 16, 16);
+        ConIndexSet cis6 =getConIndex(84, 144, 144);
+        ConvolutionLayer cl3 = new ConvolutionLayer(144, 1, 5, 5, cis5.con_lab,cis6.front_con_lab, "relu");
+        
+        /*
+        ConvolutionLayer cl4 = new ConvolutionLayer(84, 1, 1, 1, cis.con_lab,cis2.front_con_lab,"sigmoid");
+        cis = getConIndex(2, 84, 84);
+        
+        ConvolutionLayer cl5 = new ConvolutionLayer(2, 1, 1, 1, cis.con_lab,cis.front_con_lab,"sigmoid");
+*/
+        int layer_num_list[]={1,2};
+         FullConnectLayer fl=new FullConnectLayer("sigmoid", layer_num_list, 144,layer_num_list);
+        sturct.add(cl1);
+        sturct.add(p1);
+        sturct.add(cl2);
+        sturct.add(p2);
+        sturct.add(cl3);
+        sturct.add(fl);
+       
+        CnnControler cl=new CnnControler(sturct);
+        setN(0.00001);
+        cl.startTraining("C:\\Users\\wu2588\\Desktop\\1", 2);
+    }
+
 }

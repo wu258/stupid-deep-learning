@@ -7,6 +7,7 @@ package imt;
 
 import java.util.Vector;
 import static imt.BasicAlgorithm.*;
+import static imt.CnnControler.n;
 import java.util.Random;
 
 /**
@@ -80,13 +81,14 @@ public class PoolingFeatureMap {
     }
 
     public double updata_b() {
-        b = sumMatrixElement(detle_map.detlemap);
+        b -= (n*sumMatrixElement(detle_map.detlemap));
         return b;
     }
 
     public double updata_B() {
         double ans[][] = dot_product(downmap, detle_map.detlemap);
-        B = sumMatrixElement(ans);
+        B -= (n*sumMatrixElement(ans));
+        
         return B;
     }
 

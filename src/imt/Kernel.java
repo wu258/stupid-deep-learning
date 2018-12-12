@@ -7,6 +7,7 @@ package imt;
 
 import java.util.Vector;
 import static imt.BasicAlgorithm.*;
+import static imt.CnnControler.n;
 import java.util.Iterator;
 
 /**
@@ -18,16 +19,12 @@ public class Kernel {
     /**
      * @return the n
      */
-    public double getN() {
-        return n;
-    }
+    
 
     /**
      * @param n the n to set
      */
-    public void setN(double n) {
-        this.n = n;
-    }
+  
 
     /**
      * @return the deep
@@ -133,7 +130,7 @@ public class Kernel {
     double deep_kernel_map[][][];
     double mul_kernel_derivative_map[][][];
     double kernel_derivative_map[][];
-    private double n;
+    
     private double feature_map[][];
     private Vector<double[][]> input_data;
     Vector<double[][][]> deep_input_data;
@@ -151,13 +148,18 @@ public class Kernel {
         if(deep>1)
         {
             deep_kernel_map=new double[deep][y_size][x_size];
-            matrix_random_init(deep_kernel_map);
+            deep_kernel_map=matrix_random_init(deep_kernel_map);
         }
+        else
+        {
+            kernel_map=matrix_random_init(kernel_map);
+        }
+            
     }
 
     public void ForwardPropagation(Vector input) {// need recheak
         // throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-
+       
         if (deep <=1) {
             setInput_data(input);
             int k_y = getKernel_map().length;
@@ -183,8 +185,8 @@ public class Kernel {
                 double temp_input[][][] = it.next();
                 double temp_ans[][][] = convolution(temp_input, deep_kernel_map);
                 for (int d = 0; d < deep; d++) {
-                    for (int i = 0; i < temp_ans.length; i++) {
-                        for (int j = 0; j < temp_ans[0].length; j++) {
+                    for (int i = 0; i < temp_ans[0].length; i++) {
+                        for (int j = 0; j < temp_ans[0][0].length; j++) {
                             feature_map[i][j] += temp_ans[d][i][j];
                         }
                     }
@@ -197,7 +199,7 @@ public class Kernel {
      
             for (int i = 0; i < kernel_map.length; i++) {
                 for (int j = 0; j < kernel_map[0].length; j++) {
-                    kernel_map[i][j] += getN() * kernel_derivative_map[i][j];
+                    kernel_map[i][j] -= n * kernel_derivative_map[i][j];
                 }
             }
             
@@ -207,9 +209,9 @@ public class Kernel {
 
     public double[][][] mul_kernel_updata() {
          for (int d = 0; d < mul_kernel_derivative_map.length; d++) {
-                for (int i = 0; i < kernel_map.length; i++) {
-                    for (int j = 0; j < kernel_map[0].length; j++) {
-                        deep_kernel_map[d][i][j] += getN() * mul_kernel_derivative_map[d][i][j];
+                for (int i = 0; i < mul_kernel_derivative_map[0].length; i++) {
+                    for (int j = 0; j < mul_kernel_derivative_map[0][0].length; j++) {
+                        deep_kernel_map[d][i][j] -= n * mul_kernel_derivative_map[d][i][j];
                     }
                 }
             }
@@ -222,7 +224,7 @@ public class Kernel {
             mul_kernel_derivative_map = derivative_map.calculate_mul_DerivativeMap(deep_input_data, input_detle_map, "mul_kernel");
             mul_kernel_updata();
         } else {
-            kernel_derivative_map = derivative_map.calculateDerivativeMap(input_data, input_detle_map, "kernel");
+            kernel_derivative_map = derivative_map.calculateDerivativeMap(input_data, input_detle_map, "kernel");//9898989
             kernel_updata();
         }
 

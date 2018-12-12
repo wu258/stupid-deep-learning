@@ -39,9 +39,10 @@ public class FullConnectLayer implements Layer {
     FullConnectLayer(String act_type, int layer_num[], int input_size, int output_num[]) {
         input_y_size = (int) Math.sqrt(input_size);
         input_x_size = (int) Math.sqrt(input_size);
-        ConIndexSet cis = getConIndex(2, 1, 1);
+        ConIndexSet cis = getConIndex(1, 1, 1);
+        ConIndexSet cis1 = getConIndex(2, 1, 1);
         convolutionlayer = new ConvolutionLayer[layer_num.length];
-        convolutionlayer[0] = new ConvolutionLayer(1, 1, 1, 1, null, null, "sigmoid");
+        convolutionlayer[0] = new ConvolutionLayer(1, 1, 1, 1, cis.con_lab, cis1.front_con_lab, "sigmoid");
         for (int i = 1; i < layer_num.length; i++) {
             cis = getConIndex(layer_num[i], layer_num[i - 1], layer_num[i - 1]);
            // ConIndexSet cis2 = getConIndex(layer_num[i], layer_num[i + 1], layer_num[i + 1]);
@@ -58,7 +59,7 @@ public class FullConnectLayer implements Layer {
         Vector<double[][]> in = new Vector();
         in.add(input_map);
         ConvolutionFeatureMap[] convolution_featureMap = new ConvolutionFeatureMap[1];
-        convolution_featureMap[0] = new ConvolutionFeatureMap(1, 1, 1, "sigmod");
+        convolution_featureMap[0] = new ConvolutionFeatureMap(1, 1, 1, "sigmoid");
         convolution_featureMap[0].futuremap = input_map;
         double in_dir_maix[][] = new double[input_y_size][input_x_size];
         convolution_featureMap[0].activition_layer.derivative_map = matrix_adding(in_dir_maix, 1.0);
@@ -113,7 +114,7 @@ public class FullConnectLayer implements Layer {
                     convolutionlayer[i].BackPropagation("full", input_detle);
                 } else {
                     ConvolutionFeatureMap temp_input[] = ((ConvolutionLayer) convolutionlayer[i + 1]).getConvolution_featureMap();
-                    convolutionlayer[i].BackPropagation("convolution", temp_input);
+                    convolutionlayer[i].BackPropagation("full_convolution", temp_input);
                 }
             }
         }

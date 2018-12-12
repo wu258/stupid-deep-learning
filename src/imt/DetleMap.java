@@ -22,7 +22,7 @@ public class DetleMap {
     int channel_num;
     int x_size;
     int y_size;
-    double detlemap[][];
+    public  double detlemap[][];
 
     DetleMap(int y_size, int x_size) {
         this.y_size = y_size;
@@ -33,19 +33,22 @@ public class DetleMap {
     public double[][] calculateDetleMap(String next_layer_type, Vector<double[][]> input_data, double derivative_map[][], double B) {
         double ans[][] = new double[y_size][x_size];
         for (Iterator<double[][]> it = input_data.iterator(); it.hasNext();) {
-            if (next_layer_type.equals("Pooling")) {
+            if (next_layer_type.equals("pooling")) {
                 double temp[][] = it.next();
                 int up_scale = ans.length / temp.length;
                 temp = up(temp, up_scale);
                 temp = dot_product(temp, derivative_map);
                 temp=dot_product(temp,B);
                 ans = matrix_adding(ans, temp);
+                //ans=dot_product(ans, 1/input_data.size());
             }
             else
             {
                 throw new UnsupportedOperationException("wrong input tyle with new  pooling layer"); //To change body of generated methods, choose Tools | Templates.
             }
         }
+        //ans=dot_product(ans, 1/input_data.size());
+        detlemap=ans;
         return ans;
     }
 
@@ -53,19 +56,20 @@ public class DetleMap {
         double ans[][] = new double[y_size][x_size];
         int i = 0;
         for (Iterator<double[][]> it = input_data.iterator(); it.hasNext();) {
-            if (next_layer_type.equals("convolution")) {
+            if (next_layer_type.equals("convolution")||next_layer_type.equals("full_convolution")) {
                 double temp[][] = it.next();
-                double temp_krenel[][] = rot180(kernle.elementAt(i));
-                double temp_derivative_map[][] = derivative_map;
+                double temp_krenel[][] = rot180(kernle.elementAt(i++)); 
                 temp = conv2(temp, temp_krenel, "full");
-                temp = dot_product(temp, temp_derivative_map);
                 ans = matrix_adding(ans, temp);
             }
             else
             {
                  throw new UnsupportedOperationException("wrong input tyle with new  Convolution layer");
             }
+            ans = dot_product(ans, derivative_map);
         }
+        //ans=dot_product(ans, 1/input_data.size());
+        detlemap=ans;
         return ans;
     }
 }

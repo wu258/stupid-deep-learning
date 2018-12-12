@@ -30,7 +30,7 @@ public class ConvolutionLayer implements Layer {
     }
 
     int featureMap_num;
-    private ConvolutionFeatureMap convolution_featureMap[];
+    public ConvolutionFeatureMap convolution_featureMap[];
     Vector<Integer> con_lab[];
     public Vector<Integer> front_con_lab[];
     int k_deep;
@@ -112,6 +112,21 @@ public class ConvolutionLayer implements Layer {
                 DetleMap.add(convolution_featureMap[i].detle_map);
             }
         }
+        else if(next_layer_type.equals("full_convolution"))
+        {
+            DetleMap = new Vector<DetleMap>();
+            for (int i = 0; i < convolution_featureMap.length; i++) {
+                Vector<double[][]> temp_input_detle = new Vector();
+                Vector<double[][]> temp_input_kernel = new Vector();
+                for (Iterator<Integer> it = front_con_lab[i].iterator(); it.hasNext();) {
+                    int temp_index = it.next();
+                    temp_input_detle.add((double[][]) input_convolution_featureMap[temp_index].detle_map.detlemap);
+                    temp_input_kernel.add(input_convolution_featureMap[temp_index].kernel.getKernel_map());
+                }
+                convolution_featureMap[i].BackPropagation(next_layer_type, temp_input_detle, temp_input_kernel);
+                DetleMap.add(convolution_featureMap[i].detle_map);
+            }
+        }
     }
 
     @Override
@@ -140,13 +155,12 @@ public class ConvolutionLayer implements Layer {
                 double ans[][] =input_detle.elementAt(i);
                 convolution_featureMap[i].BackPropagation(next_layer_type, ans);
                 DetleMap.add(convolution_featureMap[i].detle_map);
-              
             }
         }
     }
 
     @Override
-    public Vector<double[][]> getDetleMaps() {
+    public Vector<DetleMap> getDetleMaps() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

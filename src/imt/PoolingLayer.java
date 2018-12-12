@@ -46,24 +46,26 @@ public class PoolingLayer implements Layer{
         featureMap=new Vector<double[][]>();
         this.con_lab=con_lab;
         this.act_type=act_type;
+         
+        for (int i=0;i<size;i++) {
+          
+           PoolingFeatureMap temp_p=new PoolingFeatureMap(act_type,p_y_size,p_x_size,"max");
+            pooling_featureMap[i]=temp_p;
+        }
+       
     }
     @Override
     public void ForwardPropagation(Vector input) {
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         this.input_data=input;
         featureMap=new Vector<double[][]>();
-        int t_i=0;
-        for (Iterator<double[][]> it = input_data.iterator(); it.hasNext();) {
-            it.next();
-           PoolingFeatureMap temp_p=new PoolingFeatureMap(act_type,p_y_size,p_x_size,"max");
-            getPooling_featureMap()[t_i++]=temp_p;
-        }
-        t_i=0;
+       
         for(int i=0;i<size;i++)
         {
-            getPooling_featureMap()[i].ForwardPropagation(input_data.elementAt(i));
-            featureMap.add(getPooling_featureMap()[i].futuremap);
+            pooling_featureMap[i].ForwardPropagation(input_data.elementAt(i));
+            featureMap.add(pooling_featureMap[i].futuremap);
         }
+        this.featureMap=featureMap;
     }
 
     
@@ -76,7 +78,7 @@ public class PoolingLayer implements Layer{
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         if (next_layer_type.equals("convolution")) {
               DetleMap=new Vector <DetleMap>();
-            for (int i = 0; i < getPooling_featureMap().length; i++) {
+            for (int i = 0; i < pooling_featureMap.length; i++) {
                 Vector<double[][]> temp_input_detle = new Vector();
                 Vector<double[][]> temp_input_kernel = new Vector();
                 for (Iterator<Integer> it = con_lab[i].iterator(); it.hasNext();) {
@@ -84,9 +86,15 @@ public class PoolingLayer implements Layer{
                     temp_input_detle.add((double[][]) input_convolution_featureMap[temp_index].detle_map.detlemap);
                     temp_input_kernel.add(input_convolution_featureMap[temp_index].kernel.getKernel_map());
                 }
-                getPooling_featureMap()[i].BackPropagation(next_layer_type, temp_input_detle, temp_input_kernel);
-                 DetleMap.add(getPooling_featureMap()[i].detle_map);
+                pooling_featureMap[i].BackPropagation(next_layer_type, temp_input_detle, temp_input_kernel);
+                 DetleMap.add(pooling_featureMap[i].detle_map);
             }
+            
+          
+        }
+        else
+        {
+              throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
     }
 
@@ -96,13 +104,16 @@ public class PoolingLayer implements Layer{
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         if(next_layer_type.equals("pooling")){
               DetleMap=new Vector <DetleMap>();
-         for (int i = 0; i < getPooling_featureMap().length; i++) {
+         for (int i = 0; i < pooling_featureMap.length; i++) {
               Vector<double[][]> temp_input_detle = new Vector();
               temp_input_detle.add(output_data[i].detle_map.detlemap);
               double B=output_data[i].B;
-                getPooling_featureMap()[i].BackPropagation(next_layer_type, temp_input_detle, B);
-             DetleMap.add(getPooling_featureMap()[i].detle_map);
+                pooling_featureMap[i].BackPropagation(next_layer_type, temp_input_detle, B);
+             DetleMap.add(pooling_featureMap[i].detle_map);
          }
+        }else
+        {
+              throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
     }
     public void BackPropagation(String next_layer_type,Vector<double[][]> input_detle) {
@@ -113,14 +124,14 @@ public class PoolingLayer implements Layer{
         int count=0;
             for (Iterator<double[][]> it = input_detle.iterator(); it.hasNext();) {
               double ans[][]=it.next();
-                getPooling_featureMap()[count].BackPropagation(next_layer_type, ans);
-              DetleMap.add(getPooling_featureMap()[count++].detle_map);
+                pooling_featureMap[count].BackPropagation(next_layer_type, ans);
+              DetleMap.add(pooling_featureMap[count++].detle_map);
           }
         }
     }
 
     @Override
-    public Vector<double[][]> getDetleMaps() {
+    public Vector<DetleMap> getDetleMaps() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

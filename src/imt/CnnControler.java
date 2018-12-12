@@ -23,7 +23,15 @@ import javax.imageio.ImageIO;
  */
 public class CnnControler {
 
+    /**
+     * @param aN the n to set
+     */
+    public static void setN(double aN) {
+        n = aN;
+    }
+
     Vector<Layer> sturct;
+    public static double n = 0.0001;
 
     CnnControler(Vector<Layer> sturct) {
         this.sturct = sturct;
@@ -33,16 +41,42 @@ public class CnnControler {
         // throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         Boolean flag = false;
         Vector<double[][]> front_output = null;
-        for (Iterator<Layer> sit = sturct.iterator(); sit.hasNext();) {
+        for (int i = 0; i < sturct.size(); i++) {
             if (!flag) {
-                Layer temp_layer=sit.next();
-                temp_layer.ForwardPropagation(input);
-                front_output =temp_layer.getFeatureMaps();
+
+                sturct.elementAt(i).ForwardPropagation(input);
+                front_output = sturct.elementAt(i).getFeatureMaps();
                 flag = true;
-            } else {
-                Layer temp_layer=sit.next();
-                temp_layer.ForwardPropagation(front_output);
-                front_output =temp_layer.getFeatureMaps();
+            } else if(i==sturct.size()-1)
+            {
+                int in_y_size=0;
+                int in_x_size=0;
+                 FullConnectLayer FL= (FullConnectLayer)sturct.elementAt(i);
+                 in_y_size=FL.input_y_size;
+                 in_x_size=FL.input_x_size;
+                  double in[][]=new double[in_y_size][in_x_size];
+                  int y_count = 0;
+                  int x_count = 0;
+                 for(int j=0;j<front_output.size();j++)
+                 {
+                     ((ConvolutionLayer)sturct.elementAt(i-1)).convolution_featureMap[j].front_index_y=y_count;
+                     ((ConvolutionLayer)sturct.elementAt(i-1)).convolution_featureMap[j].front_index_x=x_count;
+                   in[y_count][x_count++]=front_output.elementAt(j)[0][0];
+                   //y_count=y_count%(in_y_size-1);
+                   x_count=x_count%(in_x_size);
+                   if(x_count==0)
+                   {
+                       y_count++;
+                       y_count=y_count%(in_y_size);
+                   }
+                 }
+                 Vector<double[][]> temp_input=new Vector<double[][]>();
+                 temp_input.add(in);
+                 FL.ForwardPropagation(temp_input);
+            }
+            else {
+                sturct.elementAt(i).ForwardPropagation(front_output);
+                front_output = sturct.elementAt(i).getFeatureMaps();
             }
         }
 
@@ -55,22 +89,35 @@ public class CnnControler {
                 Vector<double[][]> temp_set_detle = new Vector<double[][]>();
                 double temp_detle[] = new double[full_connect_out.size()];
                 for (int j = 0; j < full_connect_out.size(); j++) {
-                    temp_detle[j] = (target.elementAt(j) - full_connect_out.elementAt(j)[0][0]);
-                    double temp_detle_map[][] = new double[0][0];
+                    temp_detle[j] = (full_connect_out.elementAt(j)[0][0] - target.elementAt(j));
+                    double temp_detle_map[][] = new double[1][1];
                     temp_detle_map[0][0] = temp_detle[j];
                     temp_set_detle.add(temp_detle_map);
-                    sturct.elementAt(i).BackPropagation("full", temp_set_detle);
                 }
+                sturct.elementAt(i).BackPropagation("full", temp_set_detle);
             } else {
                 String next_Layer_type = sturct.elementAt(i + 1).getLaterType();
-                if (next_Layer_type.equals("Convolution")) {
+                if (next_Layer_type.equals("Convolution")) {//反向传播的误差为0
                     ConvolutionFeatureMap temp_input[] = ((ConvolutionLayer) sturct.elementAt(i + 1)).getConvolution_featureMap();
                     sturct.elementAt(i).BackPropagation("convolution", temp_input);
                 } else if (next_Layer_type.equals("pooling")) {
                     PoolingFeatureMap temp_input[] = ((PoolingLayer) sturct.elementAt(i + 1)).getPooling_featureMap();
                     sturct.elementAt(i).BackPropagation("pooling", temp_input);
+                }else if(next_Layer_type.equals("full"))
+                {
+                      Vector<double[][]> temp_set_detle = new Vector<double[][]>();
+                      double input_detle[][]= ((FullConnectLayer)sturct.elementAt(i+1)).DetleMap.elementAt(0).detlemap;
+                     ConvolutionFeatureMap temp_input[] = ((ConvolutionLayer) sturct.elementAt(i)).getConvolution_featureMap();
+                     for(int j=0;j<temp_input.length;j++)
+                     {
+                         int temp_y=temp_input[j].front_index_y;
+                         int temp_x=temp_input[j].front_index_x;
+                          double temp_detle_map[][] = new double[1][1];
+                    temp_detle_map[0][0] = input_detle[temp_y][temp_x];
+                    temp_set_detle.add(temp_detle_map);
+                     }
+                    sturct.elementAt(i).BackPropagation("full", temp_set_detle);
                 }
-
             }
 
         }
@@ -92,6 +139,7 @@ public class CnnControler {
                     ans[2][x][y] = blue;
                 }
             }
+
             for (int d = 0; d < ans.length; d++) {
                 double max = -999999999;
                 double min = 999999999;
@@ -124,7 +172,7 @@ public class CnnControler {
             String file_name = array[i].getName();
             int target = file_name.charAt(0) - '0';
             File temp_file = array[i].getAbsoluteFile();
-            double temp[][][] = getDate(temp_file, 28, 28);
+            double temp[][][] = getDate(temp_file, 32, 32);
 
             TrainingDate td = new TrainingDate(temp, target);
             ans.add(td);
@@ -133,13 +181,22 @@ public class CnnControler {
     }
 
     public Boolean isCorrect(Vector<double[][]> model_output, int tar) {
-        double max = -999999999;
+        double max1 = -999999999;
         int index = -1;
         int count = 0;
+        double loss = 0;
+        int t_c = 0;
         for (Iterator<double[][]> it = model_output.iterator(); it.hasNext();) {
+            double temp = it.next()[0][0];
+            System.out.print(temp + " ");
 
-            if (max <= it.next()[0][0]) {
-                max = max(max, it.next()[0][0]);
+        }
+        System.out.print(tar + " ");
+        System.out.println();
+        for (Iterator<double[][]> it = model_output.iterator(); it.hasNext();) {
+            double temp = it.next()[0][0];
+            if (max1 <= temp) {
+                max1 = max(max1, temp);
                 index = count;
             }
             count++;
@@ -165,22 +222,19 @@ public class CnnControler {
         }
         return count / text_data.size();
     }
-    public Vector<Double> setupTarget(int input,int output_num)
-    {
-        Vector<Double> temp=new Vector<Double>();
-        for(int i=0;i<output_num;i++)
-        {
-            if(i!=input)
-            {
+
+    public Vector<Double> setupTarget(int input, int output_num) {
+        Vector<Double> temp = new Vector<Double>();
+        for (int i = 0; i < output_num; i++) {
+            if (i != input) {
                 temp.add(0.0);
-            }
-            else
-            {
+            } else {
                 temp.add(1.0);
             }
         }
         return temp;
     }
+
     public void startTraining(String file_floder, int output_num) {
 
         Vector<TrainingDate> text_data = readfile(file_floder, output_num);
@@ -190,13 +244,31 @@ public class CnnControler {
                 TrainingDate td = it.next();
                 ForwardPropagation(td.featureMap);
                 Vector<double[][]> model_output = sturct.lastElement().getFeatureMaps();
-                Boolean b = isCorrect(model_output, td.target);
-                if (b) {
-                    count++;
-                }
-                Vector<Double> target_v=setupTarget(td.target,output_num);
+              
+                Vector<Double> target_v = setupTarget(td.target, output_num);
                 BackPropagation(target_v);
             }
+              TestSetAccuracy("C:\\Users\\wu2588\\Desktop\\1",2);
+            System.out.println("correct rate:" + count / text_data.size());
+        }
+    }
+
+    public void text_startTraining(Vector<TrainingDate> text_data, int output_num) {
+
+        //Vector<TrainingDate> text_data = readfile(file_floder, output_num);
+        while (true) {
+            int count = 0;
+            for (Iterator<TrainingDate> it = text_data.iterator(); it.hasNext();) {
+                TrainingDate td = it.next();
+                ForwardPropagation(td.featureMap);
+                Vector<double[][]> model_output = sturct.lastElement().getFeatureMaps();
+               // Boolean b = isCorrect(model_output, td.target);
+                
+                Vector<Double> target_v = setupTarget(td.target, output_num);
+                BackPropagation(target_v);
+            }
+          
+            System.out.println("correct rate:" + count / text_data.size());
         }
     }
 }

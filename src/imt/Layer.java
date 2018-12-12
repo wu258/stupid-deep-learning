@@ -17,7 +17,7 @@ public interface Layer {
    public void ForwardPropagation(Vector input);
    public void BackPropagation(String next_layer_type,ConvolutionFeatureMap convolution_featureMap[]);
    public void BackPropagation(String next_layer_type,PoolingFeatureMap output_data[]);
-   public Vector<double[][]> getDetleMaps();
+   public Vector<DetleMap> getDetleMaps();
    public Vector<double[][]> getFeatureMaps();
       public void BackPropagation(String next_layer_type,Vector<double[][]> input_detle) ;
       public String getLaterType();

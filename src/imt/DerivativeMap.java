@@ -27,17 +27,18 @@ public class DerivativeMap {//需要修改支持多层卷积核
     }
 
     public double[][] calculateDerivativeMap(Vector<double[][]> input_map, double input_detle_map[][], String type) {
+        featurMap=new double [input_map.elementAt(0).length-input_detle_map.length+1][input_map.elementAt(0)[0].length-input_detle_map[0].length+1];
         if (type.equals("kernel")) {
             for (Iterator<double[][]> it = input_map.iterator(); it.hasNext();) {
                 double temp[][] = it.next();
                 double temp_ans[][] = conv2(temp, input_detle_map, "valid");
-                if (featurMap != null) {
+                
                     featurMap = matrix_adding(featurMap, temp_ans);
-                } else {
-                    featurMap = temp_ans;
+                
+                    
                 }
 
-            }
+            
 
             return featurMap;
         } else {
@@ -46,18 +47,18 @@ public class DerivativeMap {//需要修改支持多层卷积核
     }
 
     public double[][][] calculate_mul_DerivativeMap(Vector<double[][][]> input_map, double input_detle_map[][], String type) {
+        mul_featurMap=new double [input_map.elementAt(0).length][input_map.elementAt(0)[0].length-input_detle_map.length+1][input_map.elementAt(0)[0][0].length-input_detle_map[0].length+1];
         if (type.equals("mul_kernel")) {
             for (Iterator<double[][][]> it = input_map.iterator(); it.hasNext();) {
                 double temp[][][] = it.next();
                 double temp_ans[][][] = new double[temp.length][][];
                 for (int d = 0; d < temp.length; d++) {
                     temp_ans[d] = conv2(temp[d], input_detle_map, "valid");
+                    
                 }
-                if (mul_featurMap != null) {
+               temp_ans=dot_product(temp_ans,(1/3));
                     mul_featurMap = matrix_adding(mul_featurMap, temp_ans);
-                } else {
-                    mul_featurMap = new double[temp.length][temp_ans[0].length][temp_ans[0][0].length];
-                }
+              
 
             }
 
