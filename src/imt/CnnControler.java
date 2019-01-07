@@ -209,7 +209,7 @@ public class CnnControler {
 
     public double TestSetAccuracy(String file_floder, int output_num) {
         Vector<TrainingDate> text_data = readfile(file_floder, output_num);
-        int count = 0;
+         int count = 0;
         for (Iterator<TrainingDate> it = text_data.iterator(); it.hasNext();) {
             TrainingDate td = it.next();
             ForwardPropagation(td.featureMap);
@@ -220,7 +220,7 @@ public class CnnControler {
             }
 
         }
-        return count / text_data.size();
+        return (double)count /(double)text_data.size();
     }
 
     public Vector<Double> setupTarget(int input, int output_num) {
@@ -244,12 +244,12 @@ public class CnnControler {
                 TrainingDate td = it.next();
                 ForwardPropagation(td.featureMap);
                 Vector<double[][]> model_output = sturct.lastElement().getFeatureMaps();
-              
+                 
                 Vector<Double> target_v = setupTarget(td.target, output_num);
                 BackPropagation(target_v);
             }
-              TestSetAccuracy("C:\\Users\\wu2588\\Desktop\\1",2);
-            System.out.println("correct rate:" + count / text_data.size());
+              double rate=TestSetAccuracy("C:\\Users\\wu2588\\Desktop\\1",2);
+            System.out.println("correct rate:" + rate);
         }
     }
 
@@ -262,8 +262,11 @@ public class CnnControler {
                 TrainingDate td = it.next();
                 ForwardPropagation(td.featureMap);
                 Vector<double[][]> model_output = sturct.lastElement().getFeatureMaps();
-               // Boolean b = isCorrect(model_output, td.target);
-                
+               Boolean b = isCorrect(model_output, td.target);
+                if(b)
+                {
+                    count++;
+                }
                 Vector<Double> target_v = setupTarget(td.target, output_num);
                 BackPropagation(target_v);
             }

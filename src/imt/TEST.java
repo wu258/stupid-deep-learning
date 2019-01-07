@@ -75,7 +75,7 @@ public class TEST {
         sturct.add(cl3);
         sturct.add(fl);
         CnnControler cl=new CnnControler(sturct);
-        setN(0.00001);
+        setN(0.001);
         cl.startTraining("C:\\Users\\wu2588\\Desktop\\1", 2);//file path,output number.
     }
 
